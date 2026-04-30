@@ -1,0 +1,12 @@
+[
+  {
+    "username": "emilys",
+    "password": "emilyspass",
+    "expected_status": 200
+  },
+  {
+    "username": "wronguser",
+    "password": "emilyspass",
+    "expected_status": 400
+  }
+]
