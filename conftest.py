@@ -1,7 +1,7 @@
 import pytest
 from utils.api_client import APIClient
 
-BASE_URL = "https://dummyjsonn.com"
+BASE_URL = "https://dummyjson.com"
 
 @pytest.fixture(scope="session")
 def api_client():
