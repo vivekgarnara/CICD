@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main, master]
+    branches: [merge_automation_workflow]
   pull_request:
-    branches: [main, master]
+    branches: [merge_automation_workflow]
 
 jobs:
   test:
