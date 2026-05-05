@@ -41,3 +41,63 @@ class TestAdvancedAuthFlow:
         assert response.status_code == 200
         data = response.json()
         assert data["username"] == "emilys"
+
+    @allure.story("Test login endpoint")
+    @allure.title("Verify login with invalid credentials")
+    @allure.description("Verify the login API returns 400 for invalid username/password")
+    @allure.severity("Critical")
+    def test_login_invalid_credentials(self, api_client):
+        payload = {
+            "username": "invaliduser",
+            "password": "wrongpass",
+            "expiresInMins": 30
+        }
+
+        response = api_client.post("/auth/login", json=payload)
+        assert response.status_code == 400
+
+    @allure.story("Test login endpoint")
+    @allure.title("Verify login with missing username")
+    @allure.description("Verify the login API returns error for missing username field")
+    @allure.severity("Major")
+    def test_login_missing_username(self, api_client):
+        payload = {
+            "password": "emilyspass",
+            "expiresInMins": 30
+        }
+
+        response = api_client.post("/auth/login", json=payload)
+        assert response.status_code == 400
+
+    @allure.story("Test login endpoint")
+    @allure.title("Verify login with missing password")
+    @allure.description("Verify the login API returns error for missing password field")
+    @allure.severity("Major")
+    def test_login_missing_password(self, api_client):
+        payload = {
+            "username": "emilys",
+            "expiresInMins": 30
+        }
+
+        response = api_client.post("/auth/login", json=payload)
+        assert response.status_code == 400
+
+    @allure.story("Test get current user endpoint")
+    @allure.title("Verify get current user without token")
+    @allure.description("Verify the get current user API returns 401 when no auth token provided")
+    @allure.severity("Critical")
+    def test_get_current_user_no_token(self, api_client):
+        response = api_client.get("/auth/me")
+        assert response.status_code == 401
+
+    @allure.story("Test get current user endpoint")
+    @allure.title("Verify get current user with invalid token")
+    @allure.description("Verify the get current user API returns 401 for invalid auth token")
+    @allure.severity("Critical")
+    def test_get_current_user_invalid_token(self, api_client):
+        headers = {
+            "Authorization": "Bearer invalidtoken123"
+        }
+
+        response = api_client.get("/auth/me", headers=headers)
+        assert response.status_code == 401
