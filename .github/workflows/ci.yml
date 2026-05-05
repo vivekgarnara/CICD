@@ -1,13 +1,12 @@
 name: CI
 
 on:
-  push:
-    branches: [merge_automation_workflow]
   pull_request:
-    branches: [merge_automation_workflow]
+    branches: [main]
 
 jobs:
   test:
+    if: github.event.pull_request.head.ref == 'merge_automation_workflow'
     runs-on: ubuntu-latest
 
     steps:
