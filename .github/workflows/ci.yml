@@ -35,21 +35,28 @@ jobs:
 
       - name: Install dependencies
         run: |
+          echo "::group:: Installing Dependencies"
           pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install ruff
+          pip install -r requirements.txt ruff
+          echo "::endgroup::"
 
-      - name: Run ruff linting
+      - name: Run linting
         run: |
+          echo "::group:: Linting Started"
           ruff check . --output-format=github
+          echo "::endgroup::"
 
-      - name: Run ruff format check
+      - name: Run formatting check
         run: |
+          echo "::group:: Format Check Started"
           ruff format . --check
+          echo "::endgroup::"
 
-      - name: Run pytest with Allure
+      - name: Run tests
         run: |
-          pytest --alluredir=allure-results
+          echo "::group:: Test Execution Started"
+          pytest -v --alluredir=allure-results
+          echo "::endgroup::"
 
       - name: Upload Allure results
         if: always()
