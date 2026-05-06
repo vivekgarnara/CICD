@@ -1,0 +1,97 @@
+# CI Writing Guide
+
+## What is CI/CD?
+Continuous Integration/Continuous Deployment automates testing and deployment of code changes.
+
+## GitHub Actions Overview
+GitHub Actions uses YAML files in `.github/workflows/` to define automated workflows.
+
+## Key Components of a CI Workflow File
+
+### 1. Workflow Name
+```yaml
+name: CI Pipeline
+```
+
+### 2. Triggers (on)
+Define when the workflow runs:
+```yaml
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+```
+
+### 3. Jobs
+Define what to do:
+```yaml
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      
+      - name: Install dependencies
+        run: npm install
+      
+      - name: Run tests
+        run: npm test
+```
+
+### 4. Common Actions
+- `actions/checkout@v4`: Get repository code
+- `actions/setup-python@v5`: Set up Python
+- `actions/setup-node@v4`: Set up Node.js
+- `actions/upload-artifact@v4`: Save build artifacts
+
+### 5. Conditional Jobs
+```yaml
+jobs:
+  test:
+    if: github.event.pull_request.head.ref == 'feature-branch'
+    runs-on: ubuntu-latest
+```
+
+### 6. Environment Variables
+```yaml
+env:
+  NODE_ENV: test
+```
+
+### Best Practices
+- Use specific branches for triggers
+- Cache dependencies for faster builds
+- Upload test results/artifacts
+- Use matrix builds for multiple environments
+- Keep workflows simple and modular
+
+### Example Full Workflow
+```yaml
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - run: npm ci
+      - run: npm test
+```
+
+This guide covers the basics. For advanced features, check GitHub Actions documentation.

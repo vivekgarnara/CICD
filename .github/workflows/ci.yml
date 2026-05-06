@@ -1,25 +1,51 @@
 name: CI
 
 on:
+  push:
+    branches:
+      - merge_automation_workflow
+
   pull_request:
-    branches: [main]
+    branches:
+      - main
+    types: [opened, synchronize, reopened]
 
 jobs:
   test:
-    if: github.event.pull_request.head.ref == 'merge_automation_workflow'
+    if: github.event_name == 'push' || github.head_ref == 'merge_automation_workflow'
+
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
 
       - name: Install dependencies
         run: |
           pip install --upgrade pip
           pip install -r requirements.txt
+          pip install ruff
+
+      - name: Run ruff linting
+        run: |
+          ruff check . --show-source --statistics
+
+      - name: Run ruff format check
+        run: |
+          ruff format . --check
 
       - name: Run pytest with Allure
         run: |
