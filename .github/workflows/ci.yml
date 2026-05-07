@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - merge_automation_workflow
+      - notion_report
 
   pull_request:
     branches:
@@ -12,7 +13,7 @@ on:
 
 jobs:
   test:
-    if: github.event_name == 'push' || github.head_ref == 'merge_automation_workflow'
+    if: github.event_name == 'push' || github.head_ref == 'merge_automation_workflow' || github.head_ref == 'notion_report'
 
     runs-on: ubuntu-latest
 
@@ -64,3 +65,13 @@ jobs:
         with:
           name: allure-results
           path: allure-results
+
+      - name: Send CI report to Notion
+        if: always()
+        env:
+          NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
+          NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
+          CI_STATUS: ${{ job.status }}
+        run: |
+          pip install requests
+          python notion_report.py
