@@ -1,29 +1,62 @@
 name: CI
 
 on:
+  push:
+    branches:
+      - merge_automation_workflow
+
   pull_request:
-    branches: [main]
+    branches:
+      - main
+    types: [opened, synchronize, reopened]
 
 jobs:
   test:
-    if: github.event.pull_request.head.ref == 'merge_automation_workflow'
+    if: github.event_name == 'push' || github.head_ref == 'merge_automation_workflow'
+
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
       - name: Install dependencies
         run: |
+          echo "::group:: Installing Dependencies"
           pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r requirements.txt ruff
+          echo "::endgroup::"
 
-      - name: Run pytest with Allure
+      - name: Run linting
         run: |
-          pytest --alluredir=allure-results
+          echo "::group:: Linting Started"
+          ruff check . --output-format=github
+          echo "::endgroup::"
+
+      - name: Run formatting check
+        run: |
+          echo "::group:: Format Check Started"
+          ruff format . --check
+          echo "::endgroup::"
+
+      - name: Run tests
+        run: |
+          echo "::group:: Test Execution Started"
+          pytest -v --alluredir=allure-results
+          echo "::endgroup::"
 
       - name: Upload Allure results
         if: always()
